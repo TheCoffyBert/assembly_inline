@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 		reset = bufferin[i+2] - '0' ;
     	ph = (bufferin[i+4]-'0')*100 + (bufferin[i+5]-'0')*10 + (bufferin[i+6]-'0') ;
 
-		strcpy(tmpout, "-,--,--\n") ;//tmpout array di char 9 output temporaneo
+		strcpy(tmpout, "-,--,--\n") ;
       
 		/* printf("i=%d, init: %d, reset: %d, ph: %d, tmpout: %s", i, init, reset, ph, tmpout) ; */
     	if ( init == 0 || reset == 1) {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
       		if ( st != oldst ) {
         		nck = 0 ;
       		}
-      		else 
+      		else
       		{
         		nck = nck + 1 ;
       		}
@@ -138,6 +138,39 @@ int main(int argc, char *argv[]) {
     /* Assembly inline:
     Inserite qui il vostro blocco di codice assembly inline o richiamo a funzioni assembly.
     Il blocco di codice prende come input 'bufferin' e deve restituire una variabile stringa 'bufferout_asm' che verrà poi salvata su file. */
+
+    __asm__(
+                //anche all'inizio deve essere != /0                
+                //uail: //etichetta per il ciclo while
+                    //Inizializzo init
+                    "sub %%eax, %%ebx;"
+                    : "=b" (init)
+                    : "b" (bufferin[i]), "a" (48)
+                    //Inizializzo reset
+                    "sub %%eax, %%ebx;"
+                    : "=b" (reset)
+                    : "b" (bufferin[i+2]), "a" (48)
+
+                    //DOVREMMO FARE UNA FUNZIONE
+
+                    //Prendo il bufferin "giusto", lo moltiplico per 100 e lo salvo in ECX
+                    "sub %%ebx, %%eax;"
+                    : "a" (bufferin[i+4]), "b" (48)
+                    "mul 100;"
+                    "mov %%eax, %%ecx;"
+                    
+                    //Faccio la stessa cosa con quello moltiplicato per 10 e sommo i due bufferin
+                    "sub %%ebx, %%eax;"
+                    : "a" (bufferin[i+5]), "b" (48)
+                    "mul 10;"
+                    "add %%eax, %%ecx;"
+
+                    //Sommo l'ultimo bufferin e metto tutto in ph
+                    "sub %%ebx, %%eax;"
+                    : "a" (bufferin[i+6]), "b" (48)
+                    "add %%eax, %%ecx;"
+                    : "=c" (ph)
+    );
 
     toc_asm = current_timestamp();
 
